@@ -1,0 +1,108 @@
+---
+title: "STAT 345 Midterm"
+author: "Brandon Miller"
+date: '2022-03-25'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+#loading in packages and installing necessary data
+library(tidyverse)
+library(devtools)
+install_github("abresler/nbastatR")
+library(nbastatR)
+library(ggplot2)
+#changing the size of connection (this came up every time I installed the data in so I had to do this in order to fix it)
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+#read in 20 years of data
+shots_2002 <- teams_shots(teams="Milwaukee Bucks", seasons = 2002)
+shots_2003 <- teams_shots(teams="Milwaukee Bucks", seasons = 2003)
+shots_2004 <- teams_shots(teams="Milwaukee Bucks", seasons = 2004)
+shots_2005 <- teams_shots(teams="Milwaukee Bucks", seasons = 2005)
+shots_2006 <- teams_shots(teams="Milwaukee Bucks", seasons = 2006)
+shots_2007 <- teams_shots(teams="Milwaukee Bucks", seasons = 2007)
+shots_2008 <- teams_shots(teams="Milwaukee Bucks", seasons = 2008)
+shots_2009 <- teams_shots(teams="Milwaukee Bucks", seasons = 2009)
+shots_2010 <- teams_shots(teams="Milwaukee Bucks", seasons = 2010)
+shots_2011 <- teams_shots(teams="Milwaukee Bucks", seasons = 2011)
+shots_2012 <- teams_shots(teams="Milwaukee Bucks", seasons = 2012)
+shots_2013 <- teams_shots(teams="Milwaukee Bucks", seasons = 2013)
+shots_2014 <- teams_shots(teams="Milwaukee Bucks", seasons = 2014)
+shots_2015 <- teams_shots(teams="Milwaukee Bucks", seasons = 2015)
+shots_2016 <- teams_shots(teams="Milwaukee Bucks", seasons = 2016)
+shots_2017 <- teams_shots(teams="Milwaukee Bucks", seasons = 2017)
+shots_2018 <- teams_shots(teams="Milwaukee Bucks", seasons = 2018)
+shots_2019 <- teams_shots(teams="Milwaukee Bucks", seasons = 2019)
+shots_2020 <- teams_shots(teams="Milwaukee Bucks", seasons = 2020)
+shots_2021 <- teams_shots(teams="Milwaukee Bucks", seasons = 2021)
+#combine years
+shots <- rbind(shots_2002, shots_2003, shots_2004, shots_2005, shots_2006, shots_2007, shots_2008, shots_2009, shots_2010, shots_2011, shots_2012, shots_2013, shots_2014, shots_2015, shots_2016, shots_2017, shots_2018, shots_2019, shots_2020, shots_2021)
+#graphed new years of shots
+shots_chart <- ggplot(data=shots, aes(x=locationX, y=locationY)) + geom_point() + xlim(-300, 300) + ylim(-100, 500)
+```
+
+```{r}
+#creating the basketball court
+library(ggplot2)
+ 
+court <- ggplot(data=data.frame(x=1,y=1),aes(x*10,y*10))+
+   ###outside box:
+geom_path(data=data.frame(x=c(-27,-27,27,27,-27),y=c(-4,50,50,-4,-4)))+
+   ###key:
+geom_path(data=data.frame(x=c(-8,-8,8,8,-8),y=c(-4,14,14,-4,-4)))+
+   ###box inside the key:
+geom_path(data=data.frame(x=c(-6,-6,6,6,-6),y=c(-4,14,14,-4,-4)))+
+   ###restricted area semicircle:
+geom_path(data=data.frame(x=c(-4000:(-1)/1000,1:4000/1000),y=c(0+sqrt(4^2-c(-4000:(-1)/1000,1:4000/1000)^2))),aes(x=10*x,y=11*y))+
+   ###halfcourt semicircle:
+geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(50-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=10*x,y=10*y))+
+   ###rim:
+geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=c(c(-3+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(-3-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=10*x,y=10*y))+
+   ###backboard:
+geom_path(data=data.frame(x=c(-3,3),y=c(-4,-4)),lineend='butt')+
+   ###three-point line:
+geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=c(-5,169/12,5.25+sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),169/12,-5)),aes(x=10*x,y=8*y))+
+   ###fix aspect ratio to 1:1
+coord_fixed()
+
+```
+```{r message=FALSE, warning=FALSE}
+#load packages for gganimate
+library(gganimate)
+library(tidyverse)
+library(gapminder) #for some data
+library(gifski) #creation of gifs, could also use library(png)
+library(lubridate) #working with time variables
+library(maps) #for mapping with ggplot
+library(mapdata) #for mapping with ggplot
+library(transformr) #for changing chloropleths across time
+library(ggthemes) #extra color options
+library(viridis)
+#creating shot chart of data
+shotchart <- court + transition_time(yearSeason)+ labs(title="Year: {frame_time}", x="", y="")+theme_bw()+geom_hex(data=shots, aes(x=locationX, y=locationY), bins=25, alpha=0.8)+scale_fill_viridis(option = "C", trans="log")
+#animate data
+animate(shotchart, fps=1, nframes=20)
+```
+
+- The graphic shown is the progression of NBA shots for the Milwaukee Bucks from 2002 to 2021.
+- We can see that as the years progression shots from behind the 3 point line increase as the shot density increases there. 
+- We can also see the extreme that even more shots are being taken from beyond half court as years progress. 
+   
+```{r}
+#grab draft data
+drafts <- drafts(draft_years = 1948:2021)
+#grab mvp award data
+mvp <- bref_awards(awards="Most Valuable Player")
+#join data sets by name of player
+drafts_mvp <- left_join(drafts, mvp, by="namePlayer") %>% filter(slugAward=="mvp") %>% select("namePlayer", "numberPickOverall")
+#fixed typo in data frame
+drafts_mvp[drafts_mvp==0] <- 3
+#finding the number of mvps at each draft pick
+drafts_mvp_count <- drafts_mvp %>% group_by(numberPickOverall) %>% summarise(count=n())
+#plotting previous information in bar plot
+ggplot(data=drafts_mvp_count, aes(x=numberPickOverall, y=count)) + geom_bar(stat = "identity")+labs(title="Total Number of MVPs for Each Overall Draft Selection", x="Overall Pick", y="Number of MVPs")
+```
