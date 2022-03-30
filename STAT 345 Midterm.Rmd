@@ -91,6 +91,9 @@ animate(shotchart, fps=1, nframes=20)
 - The graphic shown is the progression of NBA shots for the Milwaukee Bucks from 2002 to 2021.
 - We can see that as the years progression shots from behind the 3 point line increase as the shot density increases there. 
 - We can also see the extreme that even more shots are being taken from beyond half court as years progress. 
+
+Report:
+The above shot chart is given from the data given by the nbastatR package and uses the shots of the Milwaukee Bucks from 2002 to 2021. My goal was to see the progression of shots over the past couple of decades since people have been saying that players have started to shoot from farther away than 20 years ago. I needed to first create the court as well as plotting the shots of each year on the court. I proceeded to create a graphic where I animated in which at each frame, it shows the shots from year to year. Lastly I wanted to show the density of shots is certain areas so I used hexagon bins and used a log scale to distinguish the difference in shot density from each part of the court. Based on the graphic, we can see that as the years progress, shots start to expanded to beyond the 3 point line as well as more shots are taken beyond half-court. This shows that the hypothesis that players have started to shot from further away than 20 years is correct and should be explored more into the reason why this is the case. 
    
 ```{r}
 #grab draft data
@@ -103,6 +106,9 @@ drafts_mvp <- left_join(drafts, mvp, by="namePlayer") %>% filter(slugAward=="mvp
 drafts_mvp[drafts_mvp==0] <- 3
 #finding the number of mvps at each draft pick
 drafts_mvp_count <- drafts_mvp %>% group_by(numberPickOverall) %>% summarise(count=n())
+#join more data
+drafts_mvp_n <- left_join(drafts_mvp, drafts_mvp_count, by="numberPickOverall")
 #plotting previous information in bar plot
-ggplot(data=drafts_mvp_count, aes(x=numberPickOverall, y=count)) + geom_bar(stat = "identity")+labs(title="Total Number of MVPs for Each Overall Draft Selection", x="Overall Pick", y="Number of MVPs")
+ggplot(data=drafts_mvp_n, aes(x=numberPickOverall, fill=namePlayer)) + geom_bar()+labs(title="Total Number of MVPs for Each Overall Draft Selection", x="Overall Pick", y="Number of MVPs")
 ```
+
